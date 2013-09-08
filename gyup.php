@@ -36,11 +36,12 @@
 		}}}
 		
 		function SQL($imgID) {
-			global $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
+			global $imgPath, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
 			if ($SQL_enabled == true) {
+				$imgFormat = exif_imagetype($imgPath);
 				$date = date("Y-m-d H:i:s");
 				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
-					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS ) VALUES ('" . $imgID ."', '" . $date . "', 0 )" );
+					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
 					mysqli_close($sql_connect);
 		}}
 		

@@ -1,5 +1,5 @@
 <?php
-	// Gyazo Upload Script for K96.co
+	// Gyazo Upload-script for K96.co
 	// error_reporting(E_ERROR); // Prevents PHP spewing out debug info to the client.
 	// find -type f -name '*.png' | while read f; do mv "$f" "${f%.png}"; done // This command will be used to remove the .png extention from old files.
 		
@@ -10,6 +10,8 @@
 		
 		$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		$fileExist = false;
+		
+		$SQL_enabled = true;
 		
 		include('../inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
 		
@@ -34,12 +36,13 @@
 		}}}
 		
 		function SQL($imgID) {
-			global $SQL_server, $SQL_user, $SQL_password, $SQL_db;
-			$date = date("Y-m-d H:i:s");
-			$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
-			mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS ) VALUES ('" . $imgID ."', '" . $date . "', 0 )" );
-				mysqli_close($sql_connect);
-		}
+			global $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
+			if ($SQL_enabled == true) {
+				$date = date("Y-m-d H:i:s");
+				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
+					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS ) VALUES ('" . $imgID ."', '" . $date . "', 0 )" );
+					mysqli_close($sql_connect);
+		}}
 		
 	if(isset($_FILES['imagedata']['tmp_name'])) {
 		save(5);

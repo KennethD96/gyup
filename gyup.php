@@ -5,17 +5,19 @@
 		
 	// Variables
 		
-		$echoURL = 'http://beta.K96.co/';
-		$savePath = '/var/www/beta/i/';
+	$echoURL = 'http://beta.K96.co/';
+	$savePath = '/var/www/beta/i/';
 		
-		$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-		$fileExist = false;
+	$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		
-		$SQL_enabled = true;
-		
-		include('../inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
+	$SQL_enabled = true;
 		
 	// Body
+
+	include('../inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
+	list($imgWidth, $imgHeight) = getimagesize($_FILES['imagedata']['tmp_name']);
+	$imgSize = $imgWidth + $imgHeight;
+	$fileExist = false;
 
 		function save($idLen) {
 			global $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
@@ -46,10 +48,12 @@
 		}}
 		
 	if(isset($_FILES['imagedata']['tmp_name'])) {
+		if($imgSize >= 16) {
 		save(5);
 			if ($fileExist == true) {
 				save(6);
 					if ($fileExist == true) {
 					echo 'error: Could not generate image ID. Please contact administrator.'; 
-	}}}		else { include("huehue.php"); echo $hue; } // Insert your own Easter Egg here.
+		}}} else { echo 'Image must contain at least 16 pixels';
+	}}		else { include("huehue.php"); echo $hue; } // Insert your own Easter Egg here.
 ?>

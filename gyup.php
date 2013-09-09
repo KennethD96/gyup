@@ -9,7 +9,7 @@
 	$savePath = '/var/www/beta/i/';
 	$validUagent = 'GyazoKD/0.30';
 	$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-		
+	
 	$SQL_enabled = true;
 		
 	// Body
@@ -20,7 +20,7 @@
 	$fileExist = false;
 
 		function save($idLen) {
-			global $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
+			global $validUagent, $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
 			
 			for ( $c = 0; $c <= 32; $c++) {
 				$imgID = substr(str_shuffle(str_repeat($randChars, $idLen)), 0 , $idLen);
@@ -35,7 +35,7 @@
 					if($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
 						echo $echoURL . $imgID;
 					} else {
-						echo $echoURL . 'download.php?id=' . $imgID; }
+						echo $echoURL . 'dl/?file=gyazo&id=' . $imgID; }
 					SQL($imgID);
 					break;
 		}}}
@@ -45,10 +45,12 @@
 			if ($SQL_enabled == true) {
 				$date = date("Y-m-d H:i:s");
 				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
-					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
+					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS, FORMAT, ADDR ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "', '" . $_SERVER['REMOTE_ADDR'] . "')" );
 					mysqli_close($sql_connect);
 		}}
-		
+	
+	//Start
+	
 	if(isset($_FILES['imagedata']['tmp_name'])) {
 		if($imgFormat >= 1) { // Checks if the uploaded file is a valid image.
 		if($imgSize >= 16) { // Checks that image contains at least 16 pixels.
@@ -56,6 +58,6 @@
 				if ($fileExist == true) {
 					save(6);
 					if ($fileExist == true) {
-						echo 'error: Could not generate image ID. Please contact administrator.'; 
+						echo 'error: Could not generate image ID. Please contact administrator.';
 	}}}}} else { include("huehue.php");} // Insert your own Easter Egg here.
 ?>

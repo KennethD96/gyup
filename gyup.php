@@ -7,6 +7,7 @@
 		
 	$echoURL = 'http://beta.K96.co/';
 	$savePath = '/var/www/beta/i/';
+	$validUagent = 'GyazoKD/0.30';
 	$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		
 	$SQL_enabled = true;
@@ -21,7 +22,7 @@
 		function save($idLen) {
 			global $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
 			
-			for ( $c = 0; $c <= 32; $c++) {	
+			for ( $c = 0; $c <= 32; $c++) {
 				$imgID = substr(str_shuffle(str_repeat($randChars, $idLen)), 0 , $idLen);
 				$imgPath = $savePath . $imgID;
 				
@@ -31,8 +32,11 @@
 				} else {
 					$fileExist = false;
 					move_uploaded_file($_FILES['imagedata']['tmp_name'], $imgPath);
-					echo $echoURL . $imgID;
-						SQL($imgID);
+					if($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
+						echo $echoURL . $imgID;
+					} else {
+						echo $echoURL . 'download.php?id=' . $imgID; }
+					SQL($imgID);
 					break;
 		}}}
 		

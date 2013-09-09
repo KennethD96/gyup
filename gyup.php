@@ -7,7 +7,6 @@
 		
 	$echoURL = 'http://beta.K96.co/';
 	$savePath = '/var/www/beta/i/';
-		
 	$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		
 	$SQL_enabled = true;
@@ -15,7 +14,7 @@
 	// Body
 
 	include('../inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
-	list($imgWidth, $imgHeight) = getimagesize($_FILES['imagedata']['tmp_name']);
+	list($imgWidth, $imgHeight, $imgFormat) = getimagesize($_FILES['imagedata']['tmp_name']);
 	$imgSize = $imgWidth + $imgHeight;
 	$fileExist = false;
 
@@ -38,9 +37,8 @@
 		}}}
 		
 		function SQL($imgID) {
-			global $imgPath, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
+			global $imgFormat, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
 			if ($SQL_enabled == true) {
-				$imgFormat = exif_imagetype($imgPath);
 				$date = date("Y-m-d H:i:s");
 				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
 					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
@@ -48,12 +46,12 @@
 		}}
 		
 	if(isset($_FILES['imagedata']['tmp_name'])) {
-		if($imgSize >= 16) {
-		save(5);
-			if ($fileExist == true) {
-				save(6);
+		if($imgFormat >= 1) { // Checks if the uploaded file is a valid image.
+		if($imgSize >= 16) { // Checks that image contains at least 16 pixels.
+			save(5);
+				if ($fileExist == true) {
+					save(6);
 					if ($fileExist == true) {
-					echo 'error: Could not generate image ID. Please contact administrator.'; 
-		}}} else { echo 'Image must contain at least 16 pixels';
-	}}		else { include("huehue.php"); echo $hue; } // Insert your own Easter Egg here.
+						echo 'error: Could not generate image ID. Please contact administrator.'; 
+	}}}}} else { include("huehue.php");} // Insert your own Easter Egg here.
 ?>

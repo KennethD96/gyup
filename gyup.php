@@ -18,9 +18,12 @@
 	list($imgWidth, $imgHeight, $imgFormat) = getimagesize($_FILES['imagedata']['tmp_name']);
 	$imgSize = $imgWidth + $imgHeight;
 	$fileExist = false;
-    
-    if($_SERVER['id']) {  
-    $header = 'X-Gyazo-Id' . substr(str_shuffle(str_repeat($randChars, 8)), 0, 8); }
+	
+	if (isset($_FILES['id']) == false) {
+		$cID = substr(str_shuffle(str_repeat($randChars, 8)), 0 , 8);
+	} else {
+		$cID = $_FILES['id']; }
+	header('X-Gyazo-Id' . $cID);
 
 		function save($idLen) {
 			global $validUagent, $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
@@ -44,13 +47,12 @@
 		}}}
 
 		function SQL($imgID) {
-			global $imgFormat, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
+			global $cID, $imgFormat, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
 			if ($SQL_enabled == true) {
 				$date = date("Y-m-d H:i:s");
 				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
 					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
-					if($_SERVER['ID'])) {
-					mysqli_query($sql_connect, "UPDATE user SET IMAGES = '" . $imgID . "' WHERE ID = '" . $_SERVER['ID']. "'"); }
+					mysqli_query($sql_connect, "UPDATE user SET IMAGES = CONCAT('" . $imgID . ", ', IMAGES) WHERE UID = '" . $cID . "')"; 
 					mysqli_close($sql_connect);
 		}}
 

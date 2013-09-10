@@ -9,7 +9,6 @@
 	$savePath = '/var/www/beta/i/';
 	$validUagent = 'GyazoKD/0.30';
 	$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
 	$SQL_enabled = true;
 
 	// Body
@@ -17,10 +16,11 @@
 	include('../inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
 	list($imgWidth, $imgHeight, $imgFormat) = getimagesize($_FILES['imagedata']['tmp_name']);
 	$imgSize = $imgWidth + $imgHeight;
+	$date = date("Y-m-d H:i:s");
 	$fileExist = false;
 	
 	if (isset($_FILES['id']) == false) {
-		$cID = substr(str_shuffle(str_repeat($randChars, 8)), 0 , 8);
+		$cID = hash('md5', $_SERVER['REMOTE_ADDR'] . date("YmdHis"));
 	} else {
 		$cID = $_FILES['id']; }
 	header('X-Gyazo-Id' . $cID);
@@ -29,7 +29,7 @@
 			global $validUagent, $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
 
 			for ( $c = 0; $c <= 32; $c++) {
-				$imgID = substr(str_shuffle(str_repeat($randChars, $idLen)), 0 , $idLen);
+				$imgID = (str_shuffle(str_repeat($randChars, $idLen)), 0 , $idLen);
 				$imgPath = $savePath . $imgID;
 
 				if (file_exists($imgPath)) {
@@ -47,12 +47,11 @@
 		}}}
 
 		function SQL($imgID) {
-			global $cID, $imgFormat, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
+			global $cID, $imgFormat, $date, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
 			if ($SQL_enabled == true) {
-				$date = date("Y-m-d H:i:s");
 				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
-					mysqli_query($sql_connect, "INSERT INTO image ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
-					mysqli_query($sql_connect, "UPDATE user SET IMAGES = CONCAT('" . $imgID . ", ', IMAGES) WHERE UID = '" . $cID . "')"; 
+					mysqli_query($sql_connect, "INSERT INTO images ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
+					mysqli_query($sql_connect, "UPDATE users SET IMAGES = CONCAT('" . $imgID . ", ', IMAGES) WHERE UID = '" . $cID . "')";
 					mysqli_close($sql_connect);
 		}}
 

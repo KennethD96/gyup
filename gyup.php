@@ -20,12 +20,13 @@
 	$fileExist = false;
 	$newID = false;
 	
-	if (isset($_FILES['id']) == false) {
-		$UID = hash('md5', $_SERVER['REMOTE_ADDR'] . date("YmdHis"));
-		$newID = true;
-	} else {
-		$UID = $_FILES['id']; }
-	header('X-Gyazo-Id' . $UID);
+	if ($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
+		if (isset($_FILES['id']) == false) {
+			$UID = hash('md5', $_SERVER['REMOTE_ADDR'] . date("YmdHis"));
+			$newID = true;
+		} else {
+			$UID = $_FILES['id']; }
+		header('X-GyazoKD-Id' . $UID); }
 
 		function save($idLen) {
 			global $validUagent, $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
@@ -69,3 +70,4 @@
 					if ($fileExist) {
 						echo 'error: Could not generate image ID. Please contact administrator.';
 	}}}}} else { include("huehue.php");} // Insert your own Easter Egg here.
+?>

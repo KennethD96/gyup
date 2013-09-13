@@ -13,23 +13,38 @@
 
 	// Body
 
-	include('../inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
+	include('../imageloader/inc/SQL_auth.php'); // $SQL_server, $SQL_db, $SQL_user, $SQL_password
+	$isGyKD = preg_match('/^GyazoKD/', $_SERVER['HTTP_USER_AGENT']);
 	list($imgWidth, $imgHeight, $imgFormat) = getimagesize($_FILES['imagedata']['tmp_name']);
 	$imgSize = $imgWidth + $imgHeight;
 	$date = date("Y-m-d H:i:s");
 	$fileExist = false;
 	$newID = false;
 	
-	if ($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
-		if (isset($_FILES['id']) == false) {
-			$UID = hash('md5', $_SERVER['REMOTE_ADDR'] . date("YmdHis"));
-			$newID = true;
+	if ($isGyKD == 0) {
+		$valid = true;
+	} else {
+		if ($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
+			$valid = true;
 		} else {
-			$UID = $_FILES['id']; }
-		header('X-GyazoKD-Id' . $UID); }
+			$valid = false;
+	}}
+	
+	if (isset($_FILES['id'])) {
+		$UID = $_FILES['id']; }
+	elseif ($isGyKD) {
+			$UID = hash('md5', $_SERVER['REMOTE_ADDR'] . date("YmdHis"));
+			header('X-GyazoKD-Id' . $UID);
+			$newID = true; }
+
+	if (isset($_FILES['id'])) {
+		$hasID = true;
+	} elseif ($newID == true) {
+		$hasID = true;
+	}
 
 		function save($idLen) {
-			global $validUagent, $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
+			global $valid, $echoURL, $savePath, $randChars, $fileExist, $imgID, $imgPath;
 
 			for ( $c = 0; $c <= 32; $c++) {
 				$imgID = substr(str_shuffle(str_repeat($randChars, $idLen)), 0 , $idLen);
@@ -41,7 +56,7 @@
 				} else {
 					$fileExist = false;
 					move_uploaded_file($_FILES['imagedata']['tmp_name'], $imgPath);
-					if ($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
+					if ($valid == true) {
 						echo $echoURL . $imgID;
 					} else {
 						echo $echoURL . 'dl/?file=gyazo&id=' . $imgID; }
@@ -50,12 +65,12 @@
 		}}}
 
 		function SQL($imgID) {
-			global $newID, $UID, $imgFormat, $date, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
+			global $newID, $hasID, $UID, $imgFormat, $date, $SQL_enabled, $SQL_server, $SQL_user, $SQL_password, $SQL_db;
 			if ($SQL_enabled) {
 				$sql_connect = new mysqli($SQL_server, $SQL_user, $SQL_password, $SQL_db);
 					if ($newID) { mysqli_query($sql_connect, "INSERT INTO users ( UID ) VALUES ('" . $UID . "') "); }
+					if ($hasID) { mysqli_query($sql_connect, "UPDATE users SET IMAGES = CONCAT('" . $imgID . "; ', IMAGES) WHERE UID = '" . $UID . "')"); }
 					mysqli_query($sql_connect, "INSERT INTO images ( ID, DATE, VIEWS, FORMAT ) VALUES ('" . $imgID ."', '" . $date . "', 0, '" . $imgFormat . "')" );
-					mysqli_query($sql_connect, "UPDATE users SET IMAGES = CONCAT('" . $imgID . ", ', IMAGES) WHERE UID = '" . $UID . "')");
 					mysqli_close($sql_connect);
 		}}
 

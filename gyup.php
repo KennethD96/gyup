@@ -5,7 +5,7 @@
 	// Variables
 
 	$echoURL = 'http://beta.K96.co/';
-	$savePath = '/var/www/beta/i/';
+	$savePath = '../i/';
 	$validUagent = 'GyazoKD/0.30';
 	$randChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	
@@ -25,31 +25,31 @@
 	$fileExist = false;
 	$newID = false;
 
-	if ($imgFormat == 3) {
+	if ($imgFormat === 3) {
 		$imgExt = 'png';
-	} elseif ($imgFormat == 2) {
+	} elseif ($imgFormat === 2) {
 		$imgExt = 'jpg';
-	} elseif ($imgFormat == 1) {
+	} elseif ($imgFormat === 1) {
 		$imgExt = 'gif';
 	} else {
-		$imgExt = 'other'; }
+		$imgExt = $imgFormat; }
 
-	if ($isGyKD == 0) { // Sets variable $valid as false if client is upgradable.
+	if ($isGyKD === 0) { // Sets variable $valid as false if client is upgradable.
 		$valid_Client = true;
 	} else {
-		if ($_SERVER['HTTP_USER_AGENT'] == $validUagent) {
+		if ($_SERVER['HTTP_USER_AGENT'] === $validUagent) {
 			$valid_Client = true;
 		} else {
 			$valid_Client = false;
 	}}
 
-	if (isset($_FILES['id'])) { // Generates Client ID and modifies return-header if client is applicable and don't already have ID.
-		$UID = $_FILES['id'];
-		$hasID = true; }
-	elseif ($isGyKD) {
+	if(strlen($_POST['id']) === 32 ) { // Generates Client ID and modifies return-header if client is applicable and don't already have ID.
+		$UID = $_POST['id'];
+		$hasID = true;
+	} elseif($isGyKD) {
 		if ($IDgen_enabled) {
 			$UID = hash('md5', $_SERVER['REMOTE_ADDR'] . date("YmdHis"));
-			header('X-GyazoKD-Id' . $UID);
+			header('X-Gyazo-Id:' . $UID);
 			$newID = true; // Used by the SQL function.
 			$hasID = true;
 	}}
@@ -61,7 +61,7 @@
 			if ($SQL_enabled) {
 			for ( $c = 1; $c <= 32; $c++) { // Repeats the process until it finds an unused image ID (up to 32 times)
 				$imgID = substr(str_shuffle(str_repeat($randChars, $idLen)), 0 , $idLen);
-				$imgPath = $savePath . $imgExt . '/' . $imgID;
+				$imgPath = $savePath . $imgID;
 				$idCount = mysqli_fetch_assoc(mysqli_query($sql_connect, "SELECT ID, COUNT(ID) FROM images WHERE ID = '" . $imgID . "'"));
 
 				if ($idCount['COUNT(ID)'] >= 1) {
@@ -70,7 +70,7 @@
 				} else {
 					$fileExist = false;
 					move_uploaded_file($_FILES['imagedata']['tmp_name'], $imgPath . '.' . $imgExt );
-					if ($valid_Client == true) {
+					if ($valid_Client) {
 						echo $echoURL . $imgID; // Returns the final image URL and breaks out of the loop.
 					} else {
 						echo $echoURL . 'dl/?file=gyazo&id=' . $imgID; } // Sends the client to the download page if client can be updated.
@@ -92,7 +92,7 @@
 				} else {
 					$fileExist = false;
 					move_uploaded_file($_FILES['imagedata']['tmp_name'], $imgPath);
-					if ($valid == true) {
+					if ($valid_client) {
 						echo $echoURL . $imgID;
 					} else {
 						echo $echoURL . 'dl/?file=gyazo&id=' . $imgID; }
@@ -102,7 +102,7 @@
 	// Start
 
 	if(isset($_FILES['imagedata']['tmp_name'])) {
-		if ($imgFormat >= 1) { // Checks if the uploaded file is a valid image format.
+		if ($imgFormat) { // Checks if the uploaded file is a valid image format.
 		if ($imgSize >= 16) { // Checks that image contains at least 16 pixels.
 			save(5); // First try with 5 symbols.
 				if ($fileExist) {
